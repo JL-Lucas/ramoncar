@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ordem de Serviço</title>
+  <style>
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px 30px 20px 30px; border-radius: 10px; }
+    .step { display: none; }
+    .step.active { display: block; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, select, textarea { width: 100%; margin-bottom: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    .btn { background: #333; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+    .btn:hover { background: #555; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background-color: #ff6600; color: white; }
+        .info-logo-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+   .logo-container { width: calc(800px / 3); }
+    .logo-container img { width: 100%; aspect-ratio: 16/9; object-fit: contain; }
+    .empresa-info { text-align: left; font-size: 0.9em; margin-bottom: 20px; padding-left: 10px; }
+    .empresa-info strong { display: block; }
+    .linha { display: flex; gap: 20px; flex-wrap: wrap; }
+    .linha > div { flex: 1; min-width: 200px; }
+    #observacao { width: 100%; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Etapa 1: Dados do Cliente -->
+<div class="step active" id="step1">
+      <h2>Dados do Cliente</h2>
+      <div class="linha">
+        <div>
+          <label for="proprietario">Proprietário</label>
+          <input type="text" id="proprietario" placeholder="Nome completo do proprietário">
+        </div>
+        <div>
+          <label for="veiculo">Veículo</label>
+          <input type="text" id="veiculo" placeholder="Marca e modelo do veículo">
+        </div>
+      </div>
+      <div class="linha">
+        <div>
+          <label for="placa">Placa</label>
+          <input type="text" id="placa" placeholder="AAA-1234" maxlength="8">
+        </div>
+        <div>
+          <label for="ano">Ano</label>
+          <input type="text" id="ano" placeholder="Ano de fabricação">
+        </div>
+        <div>
+          <label for="km">Km</label>
+          <input type="text" id="km" placeholder="Quilometragem">
+        </div>
+      </div>
+      <div class="linha">
+        <div>
+          <label for="telefone">Telefone</label>
+          <input type="tel" id="telefone" placeholder="(00) 00000-0000">
+        </div>
+        <div>
+          <label for="entrada">Data da Entrada</label>
+          <input type="date" id="entrada">
+        </div>
+        <div>
+          <label for="saida">Data da Saída</label>
+          <input type="date" id="saida">
+        </div>
+      </div>
+      <label for="observacao">Observações</label>
+      <textarea id="observacao" rows="4" placeholder="Observações adicionais..."></textarea>
+      <button class="btn" onclick="nextStep(2)">Próximo</button>
+    </div>
+
+    <!-- Etapa 2: Serviços -->
+    <div class="step" id="step2">
+      <h2>Adicionar Serviços</h2>
+      <label for="descricao">Descrição do Serviço</label>
+      <input type="text" id="descricao" placeholder="Descrição do serviço">
+      <label for="qtd">Quantidade</label>
+      <input type="number" id="qtd" placeholder="Quantidade">
+      <label for="valor">Valor Unitário (R$)</label>
+      <input type="text" id="valor" placeholder="0,00">
+      <button class="btn" onclick="adicionarServico()">Adicionar</button>
+      <table id="tabelaServicos">
+        <thead><tr><th>QTD</th><th>Descrição</th><th>V. Unitário</th><th>Total</th><th>Ação</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button class="btn" onclick="nextStep(3)">Próximo</button>
+    </div>
+
+    <!-- Etapa 3: Ordem de Serviço -->
+        <!-- Etapa 3: Ordem de Serviço -->
+    <div class="step" id="step3">
+      <h2>Ordem de Serviço</h2>
+       <div class="logo-container">
+          <img src="https://i.imgur.com/0hBV0gf.jpg" alt="Logo">
+        </div>
+      <div class="empresa-info">
+        <strong>NOME EMPRESARIAL</strong>
+        58.240.855 RAMON RIBEIRO DE OLIVEIRA<br>
+        CNPJ: 58.240.855/0001-70<br>
+        Endereço: Rua Sérgio Lopes, nº 482, Vila Olinda, Franco da Rocha-SP<br>
+        Ramon Ribeiro: Whatsapp (11) 97344-1289
+      </div>
+      <div style="clear: both;"></div>
+      <div id="osResumo"></div>
+      <button class="btn" onclick="window.print()">Baixar PDF</button>
+      <button class="btn" onclick="nextStep(1)">Editar</button>
+    </div>
+  <script>
+    let dados = {}, servicos = [];
+
+    function nextStep(step) {
+      document.querySelectorAll('.step').forEach(div => div.classList.remove('active'));
+      document.getElementById('step' + step).classList.add('active');
+      if (step === 3) preencherResumo();
+    }
+
+    function adicionarServico() {
+      const descricao = document.getElementById('descricao').value;
+      const qtd = parseInt(document.getElementById('qtd').value);
+      const valor = parseFloat(document.getElementById('valor').value.replace(/\./g, '').replace(',', '.'));
+      if (!descricao || !qtd || isNaN(valor)) return alert("Preencha todos os campos do serviço corretamente");
+      servicos.push({ descricao, qtd, valor });
+      atualizarTabela();
+    }
+
+    function atualizarTabela() {
+      const tbody = document.querySelector('#tabelaServicos tbody');
+      tbody.innerHTML = '';
+      servicos.forEach((s, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${s.qtd}</td><td>${s.descricao}</td><td>R$ ${s.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td>R$ ${(s.qtd * s.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td><button onclick="removerServico(${i})">Remover</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function removerServico(index) {
+      servicos.splice(index, 1);
+      atualizarTabela();
+    }
+
+    function preencherResumo() {
+      dados = {
+        proprietario: document.getElementById('proprietario').value,
+        veiculo: document.getElementById('veiculo').value,
+        placa: document.getElementById('placa').value,
+        ano: document.getElementById('ano').value,
+        km: parseInt(document.getElementById('km').value.replace(/\D/g, '')),
+        entrada: document.getElementById('entrada').value,
+        saida: document.getElementById('saida').value,
+        observacao: document.getElementById('observacao').value,
+      };
+
+      let html = `<p><strong>Proprietário:</strong> ${dados.proprietario} &nbsp;&nbsp; <strong>Veículo:</strong> ${dados.veiculo} &nbsp;&nbsp; <strong>Placa:</strong> ${dados.placa}</p>`;
+      html += `<p><strong>Ano:</strong> ${dados.ano} &nbsp;&nbsp; <strong>KM:</strong> ${dados.km.toLocaleString('pt-BR')} &nbsp;&nbsp; <strong>Entrada:</strong> ${dados.entrada} &nbsp;&nbsp; <strong>Saída:</strong> ${dados.saida}</p>`;
+
+      html += `<table><thead><tr><th>QTD</th><th>Descrição</th><th>V. Unitário</th><th>Total</th></tr></thead><tbody>`;
+      let total = 0;
+      servicos.forEach(s => {
+        const t = s.qtd * s.valor;
+        total += t;
+        html += `<tr><td>${s.qtd}</td><td>${s.descricao}</td><td>R$ ${s.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td>R$ ${t.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>`;
+      });
+      html += `<tr><td colspan="3"><strong>Valor Total:</strong></td><td><strong>R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td></tr>`;
+      html += `</tbody></table>`;
+
+      if (dados.observacao) {
+        html += `<p><strong>Observações:</strong> ${dados.observacao}</p>`;
+      }
+
+      html += `<p style="margin-top:20px;font-style:italic;color:gray;">Todos os serviços realizados têm garantia de 30 dias mediante apresentação da nota fiscal.<br>Ramoncar agradece a preferência.</p>`;
+      document.getElementById('osResumo').innerHTML = html;
+    }
+
+    document.getElementById('placa').addEventListener('input', function (e) {
+      let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (value.length > 3) value = value.slice(0, 3) + '-' + value.slice(3);
+      e.target.value = value.slice(0, 8);
+    });
+
+    document.getElementById('telefone').addEventListener('input', function (e) {
+      let v = e.target.value.replace(/\D/g, '');
+      if (v.length <= 10) {
+        e.target.value = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+      } else {
+        e.target.value = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+      }
+    });
+
+    document.getElementById('valor').addEventListener('input', function (e) {
+      let v = e.target.value.replace(/\D/g, '');
+      v = (parseFloat(v) / 100).toFixed(2) + '';
+      e.target.value = parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    });
+  </script>
+</body>
+</html>
