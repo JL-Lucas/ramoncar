@@ -6,25 +6,38 @@
   <title>Ordem de Serviço</title>
   <style>
 body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
-    .container { max-width: 800px; margin: auto; background: white; padding: 20px 30px 20px 30px; border-radius: 10px; }
-    .step { display: none; }
-    .step.active { display: block; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input, select, textarea { width: 100%; margin-bottom: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-    .btn { background: #333; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
-    .btn:hover { background: #555; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-    th { background-color: #ff6600; color: white; }
-        .info-logo-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-
-   .logo-container { width: calc(800px / 3); }
-    .logo-container img { width: 100%; aspect-ratio: 16/9; object-fit: contain; }
-    .empresa-info { text-align: left; font-size: 0.9em; margin-bottom: 20px; padding-left: 10px; }
-    .empresa-info strong { display: block; }
-    .linha { display: flex; gap: 20px; flex-wrap: wrap; }
-    .linha > div { flex: 1; min-width: 200px; }
-    #observacao { width: 100%; margin-top: 10px; }
+.container { max-width: 800px; margin: auto; background: white; padding: 20px 40px 20px 40px; border-radius: 10px; }
+.step { display: none; }
+.step.active { display: block; }
+label { display: block; margin-bottom: 5px; font-weight: bold; }
+input, select, textarea { width: 100%; margin-bottom: 15px; padding: 12px; border: 1px solid #ccc; border-radius: 5px; }
+.linha { display: flex; gap: 35px; flex-wrap: wrap; margin-bottom: 15px; }
+.linha > div { flex: 1; min-width: 200px; }
+#observacao { width: 100%; margin-top: 10px; }
+.btn { background: #333; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+.btn:hover { background: #555; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; border-radius: 8px; overflow: hidden; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+th { background-color: #333 !important; color: #fff !important; }
+/* Bordas externas arredondadas */
+table tr:first-child th:first-child { border-top-left-radius: 8px; }
+table tr:first-child th:last-child { border-top-right-radius: 8px; }
+table tr:last-child td:first-child { border-bottom-left-radius: 8px; }
+table tr:last-child td:last-child { border-bottom-right-radius: 8px; }
+/* Alinhar info da empresa com o título */
+.info-logo-container { display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 30px; margin-left: 0; }
+.empresa-info { text-align: left; font-size: 0.95em; padding-left: 0; margin-left: 0; flex: 1; order: 1; }
+.empresa-info strong { display: block; }
+.logo-container { width: 220px; min-width: 180px; display: flex; align-items: flex-start; justify-content: flex-end; order: 2; }
+.logo-container img { width: 100%; max-width: 220px; aspect-ratio: 16/9; object-fit: contain; }
+#osResumo { margin-left: 0 !important; }
+@media print {
+  body, .container { background: white !important; }
+  .btn, .step:not(.active) { display: none !important; }
+  .container { box-shadow: none; }
+  .info-logo-container { display: flex !important; }
+  th { background-color: #000 !important; color: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
   </style>
 </head>
 <body>
@@ -85,28 +98,31 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f
       <label for="valor">Valor Unitário (R$)</label>
       <input type="text" id="valor" placeholder="0,00">
       <button class="btn" onclick="adicionarServico()">Adicionar</button>
-      <table id="tabelaServicos">
-        <thead><tr><th>QTD</th><th>Descrição</th><th>V. Unitário</th><th>Total</th><th>Ação</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <button class="btn" onclick="nextStep(3)">Próximo</button>
+      <div id="servicosAdicionados" style="display: none;">
+        <table id="tabelaServicos">
+          <thead><tr><th>QTD</th><th>Descrição</th><th>V. Unitário</th><th>Total</th><th>Ação</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn" onclick="nextStep(3)">Próximo</button>
+      </div>
     </div>
 
     <!-- Etapa 3: Ordem de Serviço -->
         <!-- Etapa 3: Ordem de Serviço -->
     <div class="step" id="step3">
       <h2>Ordem de Serviço</h2>
-       <div class="logo-container">
+      <div class="info-logo-container" style="margin-left:0">
+        <div class="logo-container">
           <img src="https://i.imgur.com/0hBV0gf.jpg" alt="Logo">
         </div>
-      <div class="empresa-info">
-        <strong>NOME EMPRESARIAL</strong>
-        58.240.855 RAMON RIBEIRO DE OLIVEIRA<br>
-        CNPJ: 58.240.855/0001-70<br>
-        Endereço: Rua Sérgio Lopes, nº 482, Vila Olinda, Franco da Rocha-SP<br>
-        Ramon Ribeiro: Whatsapp (11) 97344-1289
+        <div class="empresa-info">
+          <strong>NOME EMPRESARIAL</strong>
+          58.240.855 RAMON RIBEIRO DE OLIVEIRA<br>
+          CNPJ: 58.240.855/0001-70<br>
+          Endereço: Rua Sérgio Lopes, nº 482, Vila Olinda, Franco da Rocha-SP<br>
+          Ramon Ribeiro: Whatsapp (11) 97344-1289
+        </div>
       </div>
-      <div style="clear: both;"></div>
       <div id="osResumo"></div>
       <button class="btn" onclick="window.print()">Baixar PDF</button>
       <button class="btn" onclick="nextStep(1)">Editar</button>
@@ -127,16 +143,28 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f
       if (!descricao || !qtd || isNaN(valor)) return alert("Preencha todos os campos do serviço corretamente");
       servicos.push({ descricao, qtd, valor });
       atualizarTabela();
+      // Limpar campos e focar na descrição
+      document.getElementById('descricao').value = '';
+      document.getElementById('qtd').value = '';
+      document.getElementById('valor').value = '';
+      document.getElementById('descricao').focus();
     }
 
     function atualizarTabela() {
       const tbody = document.querySelector('#tabelaServicos tbody');
       tbody.innerHTML = '';
-      servicos.forEach((s, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${s.qtd}</td><td>${s.descricao}</td><td>R$ ${s.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td>R$ ${(s.qtd * s.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td><button onclick="removerServico(${i})">Remover</button></td>`;
-        tbody.appendChild(tr);
-      });
+      const servicosDiv = document.getElementById('servicosAdicionados');
+      
+      if (servicos.length > 0) {
+        servicosDiv.style.display = 'block';
+        servicos.forEach((s, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${s.qtd}</td><td>${s.descricao}</td><td>R$ ${s.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td>R$ ${(s.qtd * s.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td><button onclick="removerServico(${i})">Remover</button></td>`;
+          tbody.appendChild(tr);
+        });
+      } else {
+        servicosDiv.style.display = 'none';
+      }
     }
 
     function removerServico(index) {
@@ -146,8 +174,8 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f
 
     function preencherResumo() {
       dados = {
-        proprietario: document.getElementById('proprietario').value,
-        veiculo: document.getElementById('veiculo').value,
+        proprietario: document.getElementById('proprietario').value.toUpperCase(),
+        veiculo: document.getElementById('veiculo').value.toUpperCase(),
         placa: document.getElementById('placa').value,
         ano: document.getElementById('ano').value,
         km: parseInt(document.getElementById('km').value.replace(/\D/g, '')),
@@ -156,8 +184,15 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f
         observacao: document.getElementById('observacao').value,
       };
 
+      // Função para formatar a data no padrão DD/MM/AAAA
+      function formatarData(dataString) {
+        if (!dataString) return '';
+        const data = new Date(dataString);
+        return data.toLocaleDateString('pt-BR');
+      }
+
       let html = `<p><strong>Proprietário:</strong> ${dados.proprietario} &nbsp;&nbsp; <strong>Veículo:</strong> ${dados.veiculo} &nbsp;&nbsp; <strong>Placa:</strong> ${dados.placa}</p>`;
-      html += `<p><strong>Ano:</strong> ${dados.ano} &nbsp;&nbsp; <strong>KM:</strong> ${dados.km.toLocaleString('pt-BR')} &nbsp;&nbsp; <strong>Entrada:</strong> ${dados.entrada} &nbsp;&nbsp; <strong>Saída:</strong> ${dados.saida}</p>`;
+      html += `<p><strong>Ano:</strong> ${dados.ano} &nbsp;&nbsp; <strong>KM:</strong> ${dados.km.toLocaleString('pt-BR')} &nbsp;&nbsp; <strong>Entrada:</strong> ${formatarData(dados.entrada)} &nbsp;&nbsp; <strong>Saída:</strong> ${formatarData(dados.saida)}</p>`;
 
       html += `<table><thead><tr><th>QTD</th><th>Descrição</th><th>V. Unitário</th><th>Total</th></tr></thead><tbody>`;
       let total = 0;
@@ -196,6 +231,94 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f
       let v = e.target.value.replace(/\D/g, '');
       v = (parseFloat(v) / 100).toFixed(2) + '';
       e.target.value = parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    });
+
+    // Adicionar navegação com Enter no campo descrição
+    document.getElementById('descricao').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('qtd').focus();
+      }
+    });
+
+    // Adicionar navegação com Enter no campo quantidade
+    document.getElementById('qtd').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('valor').focus();
+      }
+    });
+
+    // Adicionar serviço ao pressionar Enter no campo valor
+    document.getElementById('valor').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        adicionarServico();
+      }
+    });
+
+    // Navegação com Enter na tela de dados do cliente
+    document.getElementById('proprietario').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('veiculo').focus();
+      }
+    });
+
+    document.getElementById('veiculo').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('placa').focus();
+      }
+    });
+
+    document.getElementById('placa').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('ano').focus();
+      }
+    });
+
+    document.getElementById('ano').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('km').focus();
+      }
+    });
+
+    document.getElementById('km').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('telefone').focus();
+      }
+    });
+
+    document.getElementById('telefone').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('entrada').focus();
+      }
+    });
+
+    document.getElementById('entrada').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('saida').focus();
+      }
+    });
+
+    document.getElementById('saida').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('observacao').focus();
+      }
+    });
+
+    document.getElementById('observacao').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        nextStep(2);
+      }
     });
   </script>
 </body>
