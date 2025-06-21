@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ordem de Serviço</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
 body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
 .container { max-width: 800px; margin: auto; background: white; padding: 20px 40px 20px 40px; border-radius: 10px; }
 .step { display: none; }
 .step.active { display: block; }
 label { display: block; margin-bottom: 5px; font-weight: bold; }
-input, select, textarea { width: 100%; margin-bottom: 15px; padding: 12px; border: 1px solid #ccc; border-radius: 5px; }
+input, select, textarea { width: 100%; margin-bottom: 15px; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
 .linha { display: flex; gap: 35px; flex-wrap: wrap; margin-bottom: 15px; }
 .linha > div { flex: 1; min-width: 200px; }
 #observacao { width: 100%; margin-top: 10px; }
@@ -25,17 +26,25 @@ table tr:first-child th:last-child { border-top-right-radius: 8px; }
 table tr:last-child td:first-child { border-bottom-left-radius: 8px; }
 table tr:last-child td:last-child { border-bottom-right-radius: 8px; }
 /* Alinhar info da empresa com o título */
-.info-logo-container { display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 30px; margin-left: 0; }
-.empresa-info { text-align: left; font-size: 0.95em; padding-left: 0; margin-left: 0; flex: 1; order: 1; }
+.info-logo-container { display: none; flex-direction: row; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 30px; margin-left: 0; }
+.empresa-info { text-align: left; font-size: 0.95em; padding-left: 0; margin-left: 0; flex: 1; order: 1; display: none; }
 .empresa-info strong { display: block; }
-.logo-container { width: 220px; min-width: 180px; display: flex; align-items: flex-start; justify-content: flex-end; order: 2; }
+.logo-container { width: 220px; min-width: 180px; display: none; align-items: flex-start; justify-content: flex-end; order: 2; }
 .logo-container img { width: 100%; max-width: 220px; aspect-ratio: 16/9; object-fit: contain; }
 #osResumo { margin-left: 0 !important; }
+@media (max-width: 600px) {
+  .container { padding: 10px 8px 10px 8px; border-radius: 0; }
+  .linha { flex-direction: column; gap: 0; margin-bottom: 0; }
+  .linha > div { min-width: 100%; margin-bottom: 10px; }
+  input, select, textarea { margin-bottom: 10px; padding: 10px; }
+}
 @media print {
   body, .container { background: white !important; }
-  .btn, .step:not(.active) { display: none !important; }
+  .btn, .step:not(.active), #compartilharPDF { display: none !important; }
   .container { box-shadow: none; }
-  .info-logo-container { display: flex !important; }
+  .info-logo-container { display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: flex-start !important; margin-bottom: 20px !important; gap: 30px !important; margin-left: 0 !important; }
+  .empresa-info { display: block !important; text-align: left !important; font-size: 0.95em !important; padding-left: 0 !important; margin-left: 0 !important; flex: 1 !important; order: 1 !important; }
+  .logo-container { display: flex !important; align-items: flex-start !important; justify-content: flex-end !important; order: 2 !important; width: 220px !important; min-width: 180px !important; }
   th { background-color: #000 !important; color: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
   </style>
@@ -62,11 +71,11 @@ table tr:last-child td:last-child { border-bottom-right-radius: 8px; }
         </div>
         <div>
           <label for="ano">Ano</label>
-          <input type="text" id="ano" placeholder="Ano de fabricação">
+          <input type="text" id="ano" placeholder="Ano de fabricação" inputmode="numeric" pattern="[0-9]*">
         </div>
         <div>
           <label for="km">Km</label>
-          <input type="text" id="km" placeholder="Quilometragem">
+          <input type="text" id="km" placeholder="Quilometragem" inputmode="numeric" pattern="[0-9]*">
         </div>
       </div>
       <div class="linha">
@@ -85,6 +94,19 @@ table tr:last-child td:last-child { border-bottom-right-radius: 8px; }
       </div>
       <label for="observacao">Observações</label>
       <textarea id="observacao" rows="4" placeholder="Observações adicionais..."></textarea>
+      <label for="garantia">Garantia</label>
+      <div style="margin-bottom: 10px;">
+        <label for="diasGarantia">Dias de garantia</label>
+        <select id="diasGarantia" style="width: 100%; margin-bottom: 10px;">
+          <option value="7">7 dias</option>
+          <option value="15">15 dias</option>
+          <option value="30" selected>30 dias</option>
+          <option value="45">45 dias</option>
+          <option value="60">60 dias</option>
+          <option value="custom">Personalizado</option>
+        </select>
+      </div>
+      <input type="text" id="garantia" value="Todos os serviços realizados têm garantia de 30 dias mediante apresentação da nota fiscal." placeholder="Texto da garantia">
       <button class="btn" onclick="nextStep(2)">Próximo</button>
     </div>
 
@@ -96,7 +118,7 @@ table tr:last-child td:last-child { border-bottom-right-radius: 8px; }
       <label for="qtd">Quantidade</label>
       <input type="number" id="qtd" placeholder="Quantidade">
       <label for="valor">Valor Unitário (R$)</label>
-      <input type="text" id="valor" placeholder="0,00">
+      <input type="text" id="valor" placeholder="0,00" inputmode="decimal" pattern="[0-9,.]*">
       <button class="btn" onclick="adicionarServico()">Adicionar</button>
       <div id="servicosAdicionados" style="display: none;">
         <table id="tabelaServicos">
@@ -128,6 +150,27 @@ table tr:last-child td:last-child { border-bottom-right-radius: 8px; }
       <button class="btn" onclick="nextStep(1)">Editar</button>
     </div>
   <script>
+
+    // Atualiza o campo de garantia ao selecionar dias
+    const selectDias = document.getElementById('diasGarantia');
+    const inputGarantia = document.getElementById('garantia');
+    const textoPadrao = dias => `Todos os serviços realizados têm garantia de ${dias} dias mediante apresentação da nota fiscal.`;
+
+    selectDias.addEventListener('change', function() {
+      if (this.value !== 'custom') {
+        inputGarantia.value = textoPadrao(this.value);
+        inputGarantia.readOnly = true;
+      } else {
+        inputGarantia.readOnly = false;
+        inputGarantia.focus();
+      }
+    });
+
+    // Ao editar manualmente, muda o select para personalizado
+    inputGarantia.addEventListener('input', function() {
+      if (inputGarantia.readOnly) return;
+      selectDias.value = 'custom';
+    });
     let dados = {}, servicos = [];
 
     function nextStep(step) {
@@ -208,7 +251,8 @@ table tr:last-child td:last-child { border-bottom-right-radius: 8px; }
         html += `<p><strong>Observações:</strong> ${dados.observacao}</p>`;
       }
 
-      html += `<p style="margin-top:20px;font-style:italic;color:gray;">Todos os serviços realizados têm garantia de 30 dias mediante apresentação da nota fiscal.<br>Ramoncar agradece a preferência.</p>`;
+      const garantia = document.getElementById('garantia').value || 'Todos os serviços realizados têm garantia de 30 dias mediante apresentação da nota fiscal.';
+      html += `<p style="margin-top:20px;font-style:italic;color:gray;">${garantia}<br>Ramoncar agradece a preferência.</p>`;
       document.getElementById('osResumo').innerHTML = html;
     }
 
